@@ -1,13 +1,67 @@
 workflows:
-  brute-force:
+  full-debug:
+    name: Complete Project Analysis
     scripts:
-      - name: Try Everything for APK
+      - name: System Info
         script: |
-          # Tüm olası yolları dene
-          (cd NetworkAnalyzerAuto/android && ./gradlew assembleDebug) >/dev/null 2>&1 || true
-          (cd android && ./gradlew assembleDebug) >/dev/null 2>&1 || true
-          (./gradlew assembleDebug) >/dev/null 2>&1 || true
-          (gradle assembleDebug) >/dev/null 2>&1 || true
-          echo "All build attempts completed"
+          echo "=== SYSTEM INFORMATION ==="
+          pwd
+          whoami
+          uname -a
+          java -version 2>&1 || echo "Java not found"
+          node --version || echo "Node not found"
+          npm --version || echo "NPM not found"
+
+      - name: Project Structure
+        script: |
+          echo "=== COMPLETE PROJECT STRUCTURE ==="
+          find . -type f -name "*.json" -o -name "*.gradle" -o -name "*.js" -o -name "*.ts" -o -name "*.java" | head -50
+          echo "=== TOP-LEVEL FILES ==="
+          ls -la
+          echo "=== NETWORKANALYZERAUTO STRUCTURE ==="
+          ls -la NetworkAnalyzerAuto/ 2>/dev/null || echo "NetworkAnalyzerAuto not found!"
+          echo "=== ANDROID STRUCTURE ==="
+          ls -la NetworkAnalyzerAuto/android/ 2>/dev/null || echo "Android folder not found!"
+
+      - name: Package Analysis
+        script: |
+          echo "=== PACKAGE.JSON ANALYSIS ==="
+          cat NetworkAnalyzerAuto/package.json 2>/dev/null || echo "package.json not found"
+          echo "=== DEPENDENCIES ==="
+          cat NetworkAnalyzerAuto/package.json | grep -A 50 "dependencies" 2>/dev/null || echo "No dependencies found"
+
+      - name: Android Config Analysis
+        script: |
+          echo "=== ANDROID BUILD.GRADLE ==="
+          cat NetworkAnalyzerAuto/android/build.gradle 2>/dev/null || echo "android/build.gradle not found"
+          echo "=== APP BUILD.GRADLE ==="
+          cat NetworkAnalyzerAuto/android/app/build.gradle 2>/dev/null || echo "android/app/build.gradle not found"
+          echo "=== GRADLE PROPERTIES ==="
+          cat NetworkAnalyzerAuto/android/gradle.properties 2>/dev/null || echo "gradle.properties not found"
+
+      - name: Build Attempt with Full Logs
+        script: |
+          echo "=== BUILD ATTEMPT WITH FULL LOGS ==="
+          cd NetworkAnalyzerAuto/android 2>/dev/null && ./gradlew clean --stacktrace 2>&1 || echo "Clean failed"
+          cd NetworkAnalyzerAuto/android 2>/dev/null && ./gradlew assembleDebug --stacktrace --info 2>&1 || echo "Build failed"
+          cd NetworkAnalyzerAuto/android 2>/dev/null && ./gradlew tasks --all 2>&1 || echo "Gradle tasks failed"
+
+      - name: React Native Check
+        script: |
+          echo "=== REACT NATIVE DIAGNOSTICS ==="
+          cd NetworkAnalyzerAuto 2>/dev/null && npx react-native info 2>&1 || echo "React Native not properly installed"
+          cd NetworkAnalyzerAuto 2>/dev/null && npx react-native config 2>&1 || echo "React Native config failed"
+
+      - name: Final Artifact Search
+        script: |
+          echo "=== FINAL ARTIFACT SEARCH ==="
+          find . -name "*.apk" -type f 2>/dev/null | head -10 || echo "No APK files found"
+          find . -name "build" -type d 2>/dev/null | head -10 || echo "No build directories found"
+          echo "=== ALL FILES SUMMARY ==="
+          find . -type f | wc -l
+          du -sh .
+
     artifacts:
       - "**/*.apk"
+      - "**/*.log"
+      - "**/build/**/*"
