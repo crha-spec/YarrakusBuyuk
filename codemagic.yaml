@@ -1,18 +1,15 @@
 workflows:
-  fix-react-native:
-    name: Fix React Native Build
+  try-rn-versions:
     scripts:
-      - name: Add missing React Native maven repo
+      - name: Try multiple RN versions
         script: |
-          cd NetworkAnalyzerAuto/android
-          # build.gradle'a maven repo ekle
-          sed -i '' '/mavenCentral()/a\
-          maven { url("$rootDir/../node_modules/react-native/android") }' build.gradle
-          
-      - name: Build APK
-        script: |
-          cd NetworkAnalyzerAuto/android
-          ./gradlew clean
-          ./gradlew assembleDebug
+          cd NetworkAnalyzerAuto
+          # Önce 0.72 dene
+          npm install react-native@0.72.10 --save && npm install && cd android && ./gradlew assembleDebug && exit 0
+          # Olmazsa 0.71 dene  
+          cd .. && npm install react-native@0.71.0 --save && npm install && cd android && ./gradlew assembleDebug && exit 0
+          # Olmazsa 0.70 dene
+          cd .. && npm install react-native@0.70.0 --save && npm install && cd android && ./gradlew assembleDebug && exit 0
+          echo "All versions failed"
     artifacts:
       - "**/*.apk"
