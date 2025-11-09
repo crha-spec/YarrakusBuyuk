@@ -1,22 +1,20 @@
 workflows:
   android-build:
-    name: Smart Android Build
+    name: Direct Android Build
     scripts:
-      - name: Find and build Android project
+      - name: Debug project structure
         script: |
-          set +e  # Hatalarda durma!
-          
-          # Android projesini ara
-          ANDROID_DIR=$(find . -name "build.gradle" -type f | head -1 | xargs dirname 2>/dev/null)
-          
-          if [ -n "$ANDROID_DIR" ]; then
-            echo "Android projesi bulundu: $ANDROID_DIR"
-            cd "$ANDROID_DIR"
-            ./gradlew clean || echo "Clean failed, continuing..."
-            ./gradlew assembleDebug || echo "Build failed, continuing..."
-          else
-            echo "Android projesi bulunamadı, mevcut yapı:"
-            find . -name "*.gradle" -type f
-          fi
+          echo "=== MEVCUT DİZİN YAPISI ==="
+          pwd
+          ls -la
+          echo "=== ANDROID PROJE ARAMA ==="
+          find . -name "build.gradle" -type f
+          find . -name "android" -type d
+      
+      - name: Build APK
+        script: |
+          # Direkt doğru yolu ver
+          cd /Users/codemagic/clone/NetworkAnalyzerAuto/android
+          ./gradlew assembleDebug
     artifacts:
-      - "**/*.apk"
+      - "NetworkAnalyzerAuto/android/app/build/outputs/**/*.apk"
