@@ -1,20 +1,18 @@
 workflows:
-  android-build:
-    name: Direct Android Build
+  direct-build:
+    name: Direct APK Build
+    environment:
+      groups:
+        - android_sdk # Android SDK varsa
     scripts:
-      - name: Debug project structure
+      - name: Install dependencies
         script: |
-          echo "=== MEVCUT DİZİN YAPISI ==="
-          pwd
-          ls -la
-          echo "=== ANDROID PROJE ARAMA ==="
-          find . -name "build.gradle" -type f
-          find . -name "android" -type d
+          npm install
+          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
       
-      - name: Build APK
+      - name: Build with direct Gradle
         script: |
-          # Direkt doğru yolu ver
-          cd /Users/codemagic/clone/NetworkAnalyzerAuto/android
-          ./gradlew assembleDebug
+          cd NetworkAnalyzerAuto/android
+          gradle assembleDebug
     artifacts:
-      - "NetworkAnalyzerAuto/android/app/build/outputs/**/*.apk"
+      - NetworkAnalyzerAuto/android/app/build/outputs/**/*.apk
