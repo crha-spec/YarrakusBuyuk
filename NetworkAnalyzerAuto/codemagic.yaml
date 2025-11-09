@@ -1,1 +1,6 @@
-
+workflows:
+  simple-apk:
+    scripts:
+      - npm install && cd android && ./gradlew assembleDebug
+    artifacts:
+      - android/app/build/outputs/**/*.apk
