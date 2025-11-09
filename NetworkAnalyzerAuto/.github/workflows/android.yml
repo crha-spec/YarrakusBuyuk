@@ -32,9 +32,9 @@ jobs:
       working-directory: ./NetworkAnalyzerAuto
       run: npm install
 
-- name: Grant execute permission for gradlew
-  run: chmod +x android/gradlew
-  working-directory: ./NetworkAnalyzerAuto
+    - name: Grant execute permission for gradlew
+      run: chmod +x android/gradlew
+      working-directory: ./NetworkAnalyzerAuto
 
     - name: Clean Gradle cache
       working-directory: ./NetworkAnalyzerAuto/android
