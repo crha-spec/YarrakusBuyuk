@@ -10,9 +10,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./NetworkAnalyzerAuto
     
     steps:
     - name: Checkout code
@@ -30,22 +27,25 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: 'NetworkAnalyzerAuto/package-lock.json'
 
     - name: Install npm dependencies
-      run: npm ci
+      working-directory: ./NetworkAnalyzerAuto
+      run: npm install
 
     - name: Grant execute permission for gradlew
-      run: chmod +x android/gradlew
+      run: chmod +x NetworkAnalyzerAuto/android/gradlew
 
     - name: Clean Gradle cache
-      run: cd android && ./gradlew clean
+      working-directory: ./NetworkAnalyzerAuto/android
+      run: ./gradlew clean
 
     - name: Build Debug APK
-      run: cd android && ./gradlew assembleDebug --stacktrace
+      working-directory: ./NetworkAnalyzerAuto/android
+      run: ./gradlew assembleDebug --stacktrace
 
     - name: Build Release APK
-      run: cd android && ./gradlew assembleRelease --stacktrace
+      working-directory: ./NetworkAnalyzerAuto/android
+      run: ./gradlew assembleRelease --stacktrace
 
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
